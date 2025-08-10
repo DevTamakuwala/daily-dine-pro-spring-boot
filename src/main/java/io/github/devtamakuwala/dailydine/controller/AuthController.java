@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth/")
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
-public class LoginController {
+public class AuthController {
 
     @Autowired
     private FirebaseAuthService firebaseAuthService;
@@ -36,6 +36,24 @@ public class LoginController {
 //            log.error(String.valueOf(e.getMessage()));
             idToken = new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
 //            idToken = e.getMessage();
+        }
+
+        return idToken;
+    }
+
+    @PostMapping("register")
+    public ResponseEntity<String> register(@RequestBody LoginDTO register) {
+        try {
+            register.setPassword(DecryptionService.decryptPassword(register.getPassword()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        ResponseEntity<String> idToken;
+        try {
+            idToken = new ResponseEntity<>(firebaseAuthService.registerUser(register.getEmail(), register.getPassword()), HttpStatus.CREATED);
+        } catch (Exception e) {
+            idToken = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         return idToken;

@@ -1,19 +1,25 @@
 package io.github.devtamakuwala.dailydine.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
-
+/**
+ * Represents a Mess (food service provider) in the application.
+ * This entity extends AuditableEntity to automatically inherit the createdBy, createdAt,
+ * modifiedBy, and modifiedAt fields. This is crucial for tracking changes to a mess's profile,
+ * such as updates to their address, menu, or contact information, all of which will now be
+ * automatically audited by the system.
+ */
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblMess")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Mess {
+public class Mess extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int messId;
@@ -31,11 +37,5 @@ public class Mess {
     private String imageType;
     @Lob
     private byte[] imageData;
-    private String createdBy;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private Date createdDate;
-    private String lastModifiedBy;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private Date lastModifiedDate;
     private boolean visible;
 }

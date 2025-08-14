@@ -32,7 +32,6 @@ public class UserController {
 
     /**
      * Updates the profile of a specific user.
-     * // TODO: This endpoint is not yet implemented.
      * // It should validate the input, call the UserService to perform the update,
      * // and return a proper ResponseEntity with the updated user or an error status.
      *

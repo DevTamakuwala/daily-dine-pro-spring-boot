@@ -14,7 +14,8 @@ import java.util.Optional;
  * so that the createdBy and modifiedBy fields in our auditable entities can be populated automatically.
  * This implementation is specifically configured to handle Integer user IDs.
  */
-public class AuditorAwareImpl implements AuditorAware<Integer> { // Changed to <Integer> to match the User ID type.
+// The generic type is set to <Integer> to match the data type of the User entity's primary key.
+public class AuditorAwareImpl implements AuditorAware<Integer> {
 
     private static final Logger log = LoggerFactory.getLogger(AuditorAwareImpl.class);
 
@@ -29,21 +30,23 @@ public class AuditorAwareImpl implements AuditorAware<Integer> { // Changed to <
         // Spring Security stores information about the currently authenticated user in the SecurityContextHolder.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // If there is no authenticated user, we cannot determine the auditor.
+        // If there is no authenticated user (e.g., for public endpoints), we cannot determine the auditor.
         if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.empty();
         }
 
         // The user's principal identifier is retrieved from the Authentication object.
-        // This is typically a String, so we need to convert it to an Integer.
+        // In Spring Security, authentication.getName() typically returns a String.
         String principalName = authentication.getName();
 
         try {
-            // We attempt to parse the String identifier into an Integer.
+            // Since our user IDs are Integers, we must parse the String identifier.
+            // This successfully converts the user ID into the required Integer format.
             return Optional.of(Integer.parseInt(principalName));
         } catch (NumberFormatException e) {
-            // This catch block is a safeguard. It handles cases where the principal's name
-            // is not a valid integer. This might happen with anonymous users or system processes.
+            // This is a crucial safeguard. If the principal's name is not a valid integer
+            // (e.g., for system processes or anonymous users), we log a warning and return an empty Optional
+            // to prevent application crashes and indicate that no user auditor is available.
             log.warn("Could not parse user ID from principal. Found: {}. Returning empty auditor.", principalName);
             return Optional.empty();
         }

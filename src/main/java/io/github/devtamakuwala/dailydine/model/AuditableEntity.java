@@ -28,10 +28,10 @@ public abstract class AuditableEntity {
      * This field will store the ID of the user who created the entity.
      * The @CreatedBy annotation tells Spring Data JPA to populate this field
      * with the value returned by our AuditorAware implementation when the entity is first saved.
-     * The type is Integer to match the User entity's ID.
+     * The type was changed to Integer to match the User entity's ID type.
      */
     @CreatedBy
-    @Column(name = "created_by") // It's good practice to specify the column name.
+    @Column(name = "created_by")
     private Integer createdBy;
 
     /**
@@ -40,13 +40,14 @@ public abstract class AuditableEntity {
      * to the current time when the entity is first saved.
      */
     @CreatedDate
-    @Column(name = "created_at", updatable = false) // This field should not be updated after creation.
+    @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
     /**
      * This field will store the ID of the user who last modified the entity.
      * The @LastModifiedBy annotation tells Spring Data JPA to populate this field
      * with the value from our AuditorAware implementation every time the entity is updated.
+     * The type was changed to Integer to match the User entity's ID type.
      */
     @LastModifiedBy
     @Column(name = "modified_by")

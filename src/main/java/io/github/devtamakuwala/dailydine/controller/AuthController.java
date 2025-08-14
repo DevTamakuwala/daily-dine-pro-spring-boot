@@ -1,6 +1,7 @@
 package io.github.devtamakuwala.dailydine.controller;
 
 import io.github.devtamakuwala.dailydine.DTO.LoginDTO;
+import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.DecryptionService;
 import io.github.devtamakuwala.dailydine.service.FirebaseAuthService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,54 +10,84 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * This controller handles all authentication-related endpoints, such as user login and registration.
+ * It acts as the primary entry point for users to gain access to the application.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/auth/")
+// Enables Cross-Origin Resource Sharing (CORS) for all endpoints in this controller,
+// allowing requests from any origin. This is useful for development with separate frontends.
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class AuthController {
 
     @Autowired
     private FirebaseAuthService firebaseAuthService;
 
+    /**
+     * Handles user login requests.
+     *
+     * @param login A LoginDTO object containing the user's email and encrypted password.
+     * @return A ResponseEntity containing the Firebase ID token on successful authentication,
+     *         or an error message with an appropriate HTTP status code on failure.
+     */
     @PostMapping("login")
     public ResponseEntity<String> login(@RequestBody LoginDTO login) {
-
+        // The password from the client is expected to be encrypted.
+        // It is decrypted here before being sent to Firebase for verification.
         try {
             login.setPassword(DecryptionService.decryptPassword(login.getPassword()));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Password decryption failed for user: {}", login.getEmail(), e);
+            return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
         }
 
-        ResponseEntity<String> idToken;
+        ResponseEntity<String> response;
         try {
-            idToken = new ResponseEntity<>(firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword()), HttpStatus.FOUND);
-//            idToken = firebaseAuthService.loginAndGetIdToken(username, password);
+            // Attempt to log in using the Firebase service and get an ID token.
+            String idToken = firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword());
+            response = new ResponseEntity<>(idToken, HttpStatus.OK); // Use HttpStatus.OK for successful login.
         } catch (Exception e) {
-
-//            log.error(String.valueOf(e.getMessage()));
-            idToken = new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
-//            idToken = e.getMessage();
+            // If Firebase authentication fails, return the error message with an UNAUTHORIZED status.
+            log.error("Firebase login failed for user: {}", login.getEmail(), e);
+            response = new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
 
-        return idToken;
+        return response;
     }
 
+    /**
+     * Handles new user registration requests.
+     * This endpoint creates a user in Firebase Authentication.
+     *
+     * @param user A User object containing the new user's details (email, password, etc.).
+     * @return A ResponseEntity containing the new user's Firebase ID token on successful registration,
+     *         or an error message with an appropriate HTTP status code on failure.
+     */
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody LoginDTO register) {
+    public ResponseEntity<String> register(@RequestBody User user) {
+        // The password from the client is expected to be encrypted.
+        // It is decrypted here before being sent to Firebase for user creation.
         try {
-            register.setPassword(DecryptionService.decryptPassword(register.getPassword()));
+            user.setPassword(DecryptionService.decryptPassword(user.getPassword()));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Password decryption failed during registration for user: {}", user.getEmail(), e);
+            return new ResponseEntity<>("Invalid registration data", HttpStatus.BAD_REQUEST);
         }
 
-        ResponseEntity<String> idToken;
+        ResponseEntity<String> response;
         try {
-            idToken = new ResponseEntity<>(firebaseAuthService.registerUser(register.getEmail(), register.getPassword()), HttpStatus.CREATED);
+            // Attempt to register the user with Firebase and get an ID token.
+            String idToken = firebaseAuthService.registerUser(user.getEmail(), user.getPassword());
+            response = new ResponseEntity<>(idToken, HttpStatus.CREATED);
         } catch (Exception e) {
-            idToken = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            // If Firebase registration fails (e.g., email already exists), return the error message.
+            log.error("Firebase registration failed for user: {}", user.getEmail(), e);
+            response = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        return idToken;
+        return response;
     }
 
 }

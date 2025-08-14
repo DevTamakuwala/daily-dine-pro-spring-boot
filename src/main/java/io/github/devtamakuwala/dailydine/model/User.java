@@ -32,16 +32,32 @@ public class User extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean active;
-    @OneToOne(mappedBy = "ownerId")
+    @OneToOne(mappedBy = "userId")
     private Mess mess;
     @OneToOne(mappedBy = "userId")
     private Customer customer;
+
+    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer) {
+        this.userId = userId;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNo = phoneNo;
+        this.role = role;
+        this.active = active;
+        this.customer = customer;
+    }
+
+    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Mess mess) {
+        this.userId = userId;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNo = phoneNo;
+        this.role = role;
+        this.active = active;
+        this.mess = mess;
+    }
 }
-
-
-/*
-* Commit message
-*
-*
-*
-* */

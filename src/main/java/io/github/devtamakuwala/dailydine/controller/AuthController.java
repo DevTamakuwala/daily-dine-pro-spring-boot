@@ -47,7 +47,7 @@ public class AuthController {
         try {
             // Attempt to log in using the Firebase service and get an ID token.
             String idToken = firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword());
-            response = new ResponseEntity<>(idToken, HttpStatus.OK); // Use HttpStatus.OK for successful login.
+            response = new ResponseEntity<>(idToken, HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
         } catch (Exception e) {
             // If Firebase authentication fails, return the error message with an UNAUTHORIZED status.
             log.error("Firebase login failed for user: {}", login.getEmail(), e);

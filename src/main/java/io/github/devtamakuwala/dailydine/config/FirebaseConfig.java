@@ -22,7 +22,7 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp initialFirebaseApp() throws IOException {
 
-        ClassPathResource resource = new ClassPathResource(env.getProperty("CONFIGFILE"));
+        ClassPathResource resource = new ClassPathResource("dailydine-ab6dd-firebase-adminsdk-fbsvc-308d0fff7d.json");
 
 
 

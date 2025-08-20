@@ -22,6 +22,9 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp initialFirebaseApp() throws IOException {
 
+        // When the service account file is placed directly in the 'src/main/resources' directory,
+        // it can be accessed by its name without any preceding path.
+        // The leading slash is removed to ensure the path is resolved correctly relative to the classpath root.
         ClassPathResource resource = new ClassPathResource("dailydine-ab6dd-firebase-adminsdk-fbsvc-308d0fff7d.json");
 
 

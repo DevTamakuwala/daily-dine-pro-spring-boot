@@ -1,5 +1,6 @@
 package io.github.devtamakuwala.dailydine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.firebase.database.annotations.NotNull;
 import jakarta.persistence.*;
@@ -29,6 +30,7 @@ public class Mess extends AuditableEntity {
     private int messId;
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
+    @JsonBackReference
     private User userId;
     @NotNull
     private String messName;

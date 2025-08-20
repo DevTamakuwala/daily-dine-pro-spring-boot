@@ -4,6 +4,7 @@ import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class UserController {
      * @return A List of all User objects.
      */
     @GetMapping("users")
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers(Authentication authentication){
         return userService.getAllUsers();
     }
 

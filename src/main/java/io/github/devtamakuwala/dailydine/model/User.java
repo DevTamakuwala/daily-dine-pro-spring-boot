@@ -1,5 +1,6 @@
 package io.github.devtamakuwala.dailydine.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.github.devtamakuwala.dailydine.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,9 +33,17 @@ public class User extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean active;
-    @OneToOne(mappedBy = "userId")
+    // CascadeType.ALL ensures that any operations (persist, merge, remove, etc.) on a User entity
+    // are automatically cascaded to the associated Mess entity. This simplifies data management by
+    // avoiding the need to explicitly save the Mess entity before saving the User.
+    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Mess mess;
-    @OneToOne(mappedBy = "userId")
+    // Similarly, CascadeType.ALL is used for the Customer entity to ensure that when a User is saved,
+    // the associated Customer is also saved automatically. This resolves the TransientObjectException
+    // that occurred when trying to save a User with an unsaved Customer.
+    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Customer customer;
 
     public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer) {

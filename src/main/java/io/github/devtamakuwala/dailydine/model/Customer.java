@@ -1,5 +1,6 @@
 package io.github.devtamakuwala.dailydine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.github.devtamakuwala.dailydine.enums.SubscriptionStatus;
 import jakarta.persistence.*;
@@ -29,6 +30,7 @@ public class Customer extends AuditableEntity {
     private long customerId;
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
+    @JsonBackReference
     private User userId;
     @Enumerated(EnumType.STRING)
     private SubscriptionStatus status;

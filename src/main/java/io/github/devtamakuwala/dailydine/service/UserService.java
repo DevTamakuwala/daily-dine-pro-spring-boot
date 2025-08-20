@@ -27,6 +27,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public void createUser(User user) {
+        userRepository.save(user);
+    }
+
     // - createUser(User user)
     // - getUserById(Integer userId)
     // - updateUser(Integer userId, User userDetails)

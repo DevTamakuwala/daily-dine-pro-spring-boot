@@ -78,6 +78,12 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.70</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>12.6.1.jre11</version> <!-- or appropriate version depending on your JDK -->
+        </dependency>
     </dependencies>
 
     <build>

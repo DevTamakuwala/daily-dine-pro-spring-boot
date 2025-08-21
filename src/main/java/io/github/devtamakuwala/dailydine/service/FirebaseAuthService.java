@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 public class FirebaseAuthService {
 
-    static String FIREBASE_API_KEY = System.getenv("FIREBASE_API_KEY");
+    static String FIREBASE_API_KEY = "AIzaSyAtaSCmxOYOicA3znFpR-w5wrBUiMGF3xI";
     // The Firebase REST API endpoint for signing in a user with an email and password.
     private static final String FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + FIREBASE_API_KEY;
     // The Firebase REST API endpoint for creating a new user account.

@@ -52,6 +52,16 @@ public class AuthController {
         try {
             // Attempt to log in using the Firebase service and get an ID token.
             String idToken = firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword());
+            // After successful authentication, retrieve the user's role from the database.
+            String userRole = "";
+            if (idToken != null) {
+                // Fetch the full user object to get role information.
+                User user = userService.getUserByEmail(login.getEmail());
+                userRole = user.getRole().name();
+            }
+            // Append the user's role to the ID token, separated by a space.
+            // The frontend will need to parse this string to separate the token and the role.
+            idToken+= " "+userRole;
             response = new ResponseEntity<>(idToken, HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
         } catch (Exception e) {
             // If Firebase authentication fails, return the error message with an UNAUTHORIZED status.

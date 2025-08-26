@@ -85,9 +85,9 @@ public class AuthController {
         // The password from the client is expected to be encrypted.
         // It is decrypted here before being sent to Firebase for user creation.
         try {
-            if (!user.getPassword().equals("jenil@1234")) {
+//            if (!user.getPassword().equals("jenil@1234")) {
                 user.setPassword(DecryptionService.decryptPassword(user.getPassword()));
-            }
+//            }
         } catch (Exception e) {
             log.error("Password decryption failed during registration for user: {}", user.getEmail(), e);
             return new ResponseEntity<>("Invalid registration data", HttpStatus.BAD_REQUEST);

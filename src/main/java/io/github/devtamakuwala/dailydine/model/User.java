@@ -45,6 +45,8 @@ public class User extends AuditableEntity {
     @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Customer customer;
+    private boolean mfaEnabled = false;
+    private String mfaSecret;
 
     public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer) {
         this.userId = userId;

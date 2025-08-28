@@ -54,14 +54,16 @@ public class AuthController {
             String idToken = firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword());
             // After successful authentication, retrieve the user's role from the database.
             String userRole = "";
+            boolean visibile = false;
             if (idToken != null) {
                 // Fetch the full user object to get role information.
                 User user = userService.getUserByEmail(login.getEmail());
                 userRole = user.getRole().name();
+                visibile = user.isActive();
             }
             // Append the user's role to the ID token, separated by a space.
             // The frontend will need to parse this string to separate the token and the role.
-            idToken+= " "+userRole;
+            idToken += " " + userRole + " " + visibile;
             response = new ResponseEntity<>(idToken, HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
         } catch (Exception e) {
             // If Firebase authentication fails, return the error message with an UNAUTHORIZED status.
@@ -86,7 +88,7 @@ public class AuthController {
         // It is decrypted here before being sent to Firebase for user creation.
         try {
 //            if (!user.getPassword().equals("jenil@1234")) {
-                user.setPassword(DecryptionService.decryptPassword(user.getPassword()));
+            user.setPassword(DecryptionService.decryptPassword(user.getPassword()));
 //            }
         } catch (Exception e) {
             log.error("Password decryption failed during registration for user: {}", user.getEmail(), e);

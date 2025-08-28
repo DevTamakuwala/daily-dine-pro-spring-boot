@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 /**
  * Represents a User in the application.
@@ -45,10 +46,12 @@ public class User extends AuditableEntity {
     @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Customer customer;
+    @Column(nullable = false)
+    @ColumnDefault("0")
     private boolean mfaEnabled = false;
     private String mfaSecret;
 
-    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer) {
+    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer, boolean mfaEnabled, String mfaSecret) {
         this.userId = userId;
         this.email = email;
         this.password = password;
@@ -58,9 +61,11 @@ public class User extends AuditableEntity {
         this.role = role;
         this.active = active;
         this.customer = customer;
+        this.mfaEnabled = mfaEnabled;
+        this.mfaSecret = mfaSecret;
     }
 
-    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Mess mess) {
+    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Mess mess, boolean mfaEnabled, String mfaSecret) {
         this.userId = userId;
         this.email = email;
         this.password = password;
@@ -70,5 +75,7 @@ public class User extends AuditableEntity {
         this.role = role;
         this.active = active;
         this.mess = mess;
+        this.mfaEnabled = mfaEnabled;
+        this.mfaSecret = mfaSecret;
     }
 }

@@ -1,12 +1,17 @@
 package io.github.devtamakuwala.dailydine.controller;
 
+import io.github.devtamakuwala.dailydine.model.BackupCode;
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.repository.UserRepository;
 import io.github.devtamakuwala.dailydine.service.MfaService;
 import io.github.devtamakuwala.dailydine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +47,8 @@ public class MfaController {
      * @param body A map containing the user's email.
      * @return A response entity containing the QR code URI and manual setup key, or an error message.
      */
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @PostMapping("/setup")
     public ResponseEntity<?> setupDevice(@RequestBody Map<String, String> body) {
         User user = userService.getUserByEmail(body.get("email"));
@@ -52,16 +59,27 @@ public class MfaController {
         if (user.isMfaEnabled()) {
             return ResponseEntity.badRequest().body("MFA is already enabled for this account. Please disable it first if you wish to reset.");
         }
+        // Clear any old codes before generating new ones
+        user.getBackupCodes().clear();
 
         final String secret = mfaService.generateNewSecret();
+        final List<String> backupCodes = mfaService.generateBackupCodes();
+
+        // Hash the codes before saving them to the database
+        backupCodes.forEach(code -> {
+            user.getBackupCodes().add(new BackupCode(passwordEncoder.encode(code), user));
+        });
+
         user.setMfaSecret(secret);
         user.setMfaEnabled(false); // MFA is not yet active until verified
         userRepository.save(user);
 
         // This is where you provide both the QR code and the manual setup key
+        // Return the PLAIN TEXT codes to the user ONE TIME
         return ResponseEntity.ok(Map.of(
                 "qrCodeUri", mfaService.generateQrCodeImageUri(secret, user.getEmail()),
-                "manualSetupKey", secret // This is the secret key for manual entry
+                "manualSetupKey", secret,
+                "backupCodes", backupCodes // Add this to the response
         ));
     }
 

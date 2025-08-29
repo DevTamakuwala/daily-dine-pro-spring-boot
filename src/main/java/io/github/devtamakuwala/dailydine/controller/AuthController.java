@@ -1,5 +1,6 @@
 package io.github.devtamakuwala.dailydine.controller;
 
+import io.github.devtamakuwala.dailydine.DTO.BackupCodeLoginDTO;
 import io.github.devtamakuwala.dailydine.DTO.LoginDTO;
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.*;
@@ -8,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This controller handles all authentication-related endpoints, such as user login and registration.
@@ -29,6 +33,8 @@ public class AuthController {
     private CustomerService customerService;
     @Autowired
     private MessService messService;
+    @Autowired
+    private MfaService mfaService;
 
     /**
      * Handles user login requests.
@@ -119,6 +125,52 @@ public class AuthController {
         }
 
         return response;
+    }
+
+    /**
+     * Handles user login with a backup code.
+     * This endpoint allows users to log in with a backup code if they don't have access to their authenticator app.
+     *
+     * @param login A BackupCodeLoginDTO object containing the user's email, password, and backup code.
+     * @return A ResponseEntity containing the Firebase ID token, user role, and visibility on successful authentication,
+     * or an error message with an appropriate HTTP status code on failure.
+     */
+    @PostMapping("login-backup")
+    public ResponseEntity<Map<String, Object>> loginWithBackupCode(@RequestBody BackupCodeLoginDTO login) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // First, verify the user's password
+            login.setPassword(DecryptionService.decryptPassword(login.getPassword()));
+            String idToken = firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword());
+            if (idToken == null) {
+                response.put("error", "Invalid credentials");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+
+            User user = userService.getUserByEmail(login.getEmail());
+
+            if (!user.isMfaEnabled()){
+                response.put("Error", "MFA is not verified");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+
+
+            if (mfaService.verifyBackupCode(user, login.getBackupCode())) {
+                String role = user.getRole().name();
+                boolean visible = user.isActive();
+                response.put("idToken", idToken);
+                response.put("role", role);
+                response.put("visible", visible);
+                userService.createUser(user); // This will save the updated user
+                return new ResponseEntity<>(response, HttpStatus.FOUND);
+            } else {
+                response.put("Error", "Invalid backup code.");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            response.put("Error", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
     }
 
 }

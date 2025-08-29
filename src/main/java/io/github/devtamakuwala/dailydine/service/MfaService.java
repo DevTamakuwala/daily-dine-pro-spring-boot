@@ -9,8 +9,17 @@ import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
 import dev.samstevens.totp.time.SystemTimeProvider;
 import dev.samstevens.totp.time.TimeProvider;
+import io.github.devtamakuwala.dailydine.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
@@ -21,6 +30,8 @@ import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 @Service
 @Slf4j
 public class MfaService {
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * Generates a new random 32-character secret key for MFA.
@@ -58,6 +69,44 @@ public class MfaService {
         }
 
         return getDataUriForImage(imageData, generator.getImageMimeType());
+    }
+
+    /**
+     * Generates a list of 10 random, 10-digit backup codes for MFA.
+     *
+     * @return A list of 10 backup codes.
+     */
+    public List<String> generateBackupCodes() {
+        SecureRandom random = new SecureRandom();
+        return IntStream.range(0, 10)
+                .mapToObj(i -> {
+                    // Generate an 10-digit code (from 0 to 99,999,999)
+                    int code = random.nextInt(100_000_000);
+                    String codeStr = String.format("%10d", code); // Pad with leading zeros if needed
+
+                    // Format the code for readability
+                    return codeStr.substring(0, 5) + "-" + codeStr.substring(5);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Verifies a backup code provided by the user.
+     *
+     * @param user The user attempting to log in.
+     * @param code The backup code to verify.
+     * @return True if the code is valid and has not been used before, false otherwise.
+     */
+    public boolean verifyBackupCode(User user, String code) {
+        // Find a stored code that matches the provided code
+        return user.getBackupCodes().stream()
+                .filter(backupCode -> passwordEncoder.matches(code, backupCode.getCode()))
+                .findFirst()
+                .map(backupCode -> {
+                    // If a match is found, remove it so it can't be used again
+                    user.getBackupCodes().remove(backupCode);
+                    return true;
+                }).orElse(false);
     }
 
     /**

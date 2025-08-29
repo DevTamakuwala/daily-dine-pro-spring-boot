@@ -9,6 +9,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a User in the application.
  * This entity now extends AuditableEntity to automatically inherit the createdBy, createdAt,
@@ -51,7 +54,18 @@ public class User extends AuditableEntity {
     private boolean mfaEnabled = false;
     private String mfaSecret;
 
-    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer, boolean mfaEnabled, String mfaSecret) {
+    /**
+     * A list of backup codes for the user.
+     * - @OneToMany: Defines a one-to-many relationship between User and BackupCode.
+     * - mappedBy = "user": Specifies that the `user` field in the BackupCode entity owns the relationship.
+     * - cascade = CascadeType.ALL: Ensures that any operations (persist, merge, remove, etc.) on a User entity are automatically cascaded to the associated backup codes.
+     * - orphanRemoval = true: Ensures that if a backup code is removed from this list, it is also deleted from the database.
+     * - fetch = FetchType.EAGER: Ensures that the backup codes are always loaded along with the user.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<BackupCode> backupCodes = new ArrayList<>();
+
+    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer, boolean mfaEnabled, String mfaSecret, List<BackupCode> backupCodes) {
         this.userId = userId;
         this.email = email;
         this.password = password;
@@ -63,9 +77,10 @@ public class User extends AuditableEntity {
         this.customer = customer;
         this.mfaEnabled = mfaEnabled;
         this.mfaSecret = mfaSecret;
+        this.backupCodes = backupCodes;
     }
 
-    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Mess mess, boolean mfaEnabled, String mfaSecret) {
+    public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Mess mess, boolean mfaEnabled, String mfaSecret, List<BackupCode> backupCodes) {
         this.userId = userId;
         this.email = email;
         this.password = password;
@@ -77,5 +92,6 @@ public class User extends AuditableEntity {
         this.mess = mess;
         this.mfaEnabled = mfaEnabled;
         this.mfaSecret = mfaSecret;
+        this.backupCodes = backupCodes;
     }
 }

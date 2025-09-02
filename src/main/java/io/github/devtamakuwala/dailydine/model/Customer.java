@@ -28,7 +28,14 @@ public class Customer extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long customerId;
-    @OneToOne()
+    /**
+     * The user associated with this customer.
+     * - @OneToOne: Defines a one-to-one relationship between Customer and User.
+     * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated User object from the database when it is explicitly accessed.
+     * - @JoinColumn: Specifies the foreign key column in the `tblCustomer` table.
+     * - @JsonBackReference: Prevents infinite recursion during JSON serialization by marking this as the "back" part of the relationship.
+     */
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     @JsonBackReference
     private User userId;

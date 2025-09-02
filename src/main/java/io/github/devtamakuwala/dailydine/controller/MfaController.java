@@ -7,6 +7,7 @@ import io.github.devtamakuwala.dailydine.service.MfaService;
 import io.github.devtamakuwala.dailydine.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -44,13 +45,14 @@ public class MfaController {
      * Endpoint to start the MFA setup process.
      * This method generates a new MFA secret and returns a QR code URI and a manual setup key.
      *
+     * @param authentication The authentication principal, ensuring the user is authenticated.
      * @param body A map containing the user's email.
      * @return A response entity containing the QR code URI and manual setup key, or an error message.
      */
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/setup")
-    public ResponseEntity<?> setupDevice(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> setupDevice(Authentication authentication, @RequestBody Map<String, String> body) {
         User user = userService.getUserByEmail(body.get("email"));
         if (user == null) {
             return ResponseEntity.badRequest().body("User not found");
@@ -86,11 +88,12 @@ public class MfaController {
     /**
      * Endpoint to verify the Time-based One-Time Password (TOTP) and activate MFA.
      *
+     * @param authentication The authentication principal, ensuring the user is authenticated.
      * @param verifyRequest The request body containing the user's email and the verification code.
      * @return A response entity with a success or error message.
      */
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyCode(@RequestBody VerifyRequest verifyRequest) {
+    public ResponseEntity<?> verifyCode(Authentication authentication, @RequestBody VerifyRequest verifyRequest) {
         User user = userService.getUserByEmail(verifyRequest.email);
         if (user == null) {
             return ResponseEntity.badRequest().body("User not found");

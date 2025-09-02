@@ -28,8 +28,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        // Public endpoints that do not require authentication
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+                        // Authentication-related endpoints are open to all users
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // All other API endpoints require authentication
+                        .requestMatchers("/api/**").authenticated()
+                        // Any other request not matching the above rules must be authenticated
                         .anyRequest().authenticated()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

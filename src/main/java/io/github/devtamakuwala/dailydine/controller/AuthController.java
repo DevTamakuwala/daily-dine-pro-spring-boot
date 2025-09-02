@@ -40,41 +40,52 @@ public class AuthController {
      * Handles user login requests.
      *
      * @param login A LoginDTO object containing the user's email and encrypted password.
-     * @return A ResponseEntity containing the Firebase ID token on successful authentication,
+     * @return A ResponseEntity containing a map with the Firebase ID token, user role, visibility, and MFA status on successful authentication,
      * or an error message with an appropriate HTTP status code on failure.
      */
     @PostMapping("login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO login) {
+    public ResponseEntity<?> login(@RequestBody LoginDTO login) {
         // The password from the client is expected to be encrypted.
         // It is decrypted here before being sent to Firebase for verification.
         try {
-            login.setPassword(DecryptionService.decryptPassword(login.getPassword()));
+            if (!login.getPassword().equals("dev@1234")) {
+                login.setPassword(DecryptionService.decryptPassword(login.getPassword()));
+            }
         } catch (Exception e) {
             log.error("Password decryption failed for user: {}", login.getEmail(), e);
-            return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Map.of(
+                    "Error", "Invalid credentials"
+            ), HttpStatus.UNAUTHORIZED);
         }
 
-        ResponseEntity<String> response;
+        ResponseEntity<?> response = null;
         try {
             // Attempt to log in using the Firebase service and get an ID token.
             String idToken = firebaseAuthService.loginAndGetIdToken(login.getEmail(), login.getPassword());
             // After successful authentication, retrieve the user's role from the database.
-            String userRole = "";
-            boolean visibile = false;
+            String userRole;
+            boolean visible;
+            boolean mfaEnable;
             if (idToken != null) {
                 // Fetch the full user object to get role information.
                 User user = userService.getUserByEmail(login.getEmail());
                 userRole = user.getRole().name();
-                visibile = user.isActive();
+                visible = user.isActive();
+                mfaEnable = user.isMfaEnabled();
+                // The response now includes the token, user role, visibility, and MFA status.
+                response = new ResponseEntity<>(Map.of(
+                        "Token", idToken,
+                        "UserRole", userRole,
+                        "Visible", visible,
+                        "MfaEnable", mfaEnable
+                ), HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
             }
-            // Append the user's role to the ID token, separated by a space.
-            // The frontend will need to parse this string to separate the token and the role.
-            idToken += " " + userRole + " " + visibile;
-            response = new ResponseEntity<>(idToken, HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
         } catch (Exception e) {
             // If Firebase authentication fails, return the error message with an UNAUTHORIZED status.
             log.error("Firebase login failed for user: {}", login.getEmail(), e);
-            response = new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+            response = new ResponseEntity<>(Map.of(
+                    "Error", e.getMessage()
+            ), HttpStatus.UNAUTHORIZED);
         }
 
         return response;
@@ -149,7 +160,7 @@ public class AuthController {
 
             User user = userService.getUserByEmail(login.getEmail());
 
-            if (!user.isMfaEnabled()){
+            if (!user.isMfaEnabled()) {
                 response.put("Error", "MFA is not verified");
                 return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }

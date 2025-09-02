@@ -28,7 +28,14 @@ public class Mess extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int messId;
-    @OneToOne()
+    /**
+     * The user associated with this mess.
+     * - @OneToOne: Defines a one-to-one relationship between Mess and User.
+     * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated User object from the database when it is explicitly accessed.
+     * - @JoinColumn: Specifies the foreign key column in the `tblMess` table.
+     * - @JsonBackReference: Prevents infinite recursion during JSON serialization by marking this as the "back" part of the relationship.
+     */
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     @JsonBackReference
     private User userId;

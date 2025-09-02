@@ -37,16 +37,20 @@ public class User extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean active;
-    // CascadeType.ALL ensures that any operations (persist, merge, remove, etc.) on a User entity
-    // are automatically cascaded to the associated Mess entity. This simplifies data management by
-    // avoiding the need to explicitly save the Mess entity before saving the User.
-    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    /**
+     * The mess associated with this user.
+     * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated Mess object from the database when it is explicitly accessed.
+     * - @JsonManagedReference: Prevents infinite recursion during JSON serialization by marking this as the "front" part of the relationship.
+     */
+    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private Mess mess;
-    // Similarly, CascadeType.ALL is used for the Customer entity to ensure that when a User is saved,
-    // the associated Customer is also saved automatically. This resolves the TransientObjectException
-    // that occurred when trying to save a User with an unsaved Customer.
-    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    /**
+     * The customer associated with this user.
+     * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated Customer object from the database when it is explicitly accessed.
+     * - @JsonManagedReference: Prevents infinite recursion during JSON serialization by marking this as the "front" part of the relationship.
+     */
+    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private Customer customer;
     @Column(nullable = false)
@@ -56,13 +60,11 @@ public class User extends AuditableEntity {
 
     /**
      * A list of backup codes for the user.
-     * - @OneToMany: Defines a one-to-many relationship between User and BackupCode.
-     * - mappedBy = "user": Specifies that the `user` field in the BackupCode entity owns the relationship.
-     * - cascade = CascadeType.ALL: Ensures that any operations (persist, merge, remove, etc.) on a User entity are automatically cascaded to the associated backup codes.
-     * - orphanRemoval = true: Ensures that if a backup code is removed from this list, it is also deleted from the database.
-     * - fetch = FetchType.EAGER: Ensures that the backup codes are always loaded along with the user.
+     * - fetch = FetchType.LAZY: Optimizes performance by only loading the backup codes from the database when they are explicitly accessed.
+     * - @JsonManagedReference: Prevents infinite recursion during JSON serialization by marking this as the "front" part of the relationship.
      */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<BackupCode> backupCodes = new ArrayList<>();
 
     public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer, boolean mfaEnabled, String mfaSecret, List<BackupCode> backupCodes) {

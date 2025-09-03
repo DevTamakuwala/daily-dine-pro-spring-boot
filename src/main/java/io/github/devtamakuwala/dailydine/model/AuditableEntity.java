@@ -20,6 +20,8 @@ import java.time.Instant;
  * we avoid code duplication and ensure a consistent approach to auditing across the application.
  */
 @Data
+@Getter
+@Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity {

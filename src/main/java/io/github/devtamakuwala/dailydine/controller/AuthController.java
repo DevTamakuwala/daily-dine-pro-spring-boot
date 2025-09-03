@@ -53,9 +53,7 @@ public class AuthController {
             }
         } catch (Exception e) {
             log.error("Password decryption failed for user: {}", login.getEmail(), e);
-            return new ResponseEntity<>(Map.of(
-                    "Error", "Invalid credentials"
-            ), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Map.of("Error", "Invalid credentials"), HttpStatus.UNAUTHORIZED);
         }
 
         ResponseEntity<?> response = null;
@@ -73,19 +71,12 @@ public class AuthController {
                 visible = user.isActive();
                 mfaEnable = user.isMfaEnabled();
                 // The response now includes the token, user role, visibility, and MFA status.
-                response = new ResponseEntity<>(Map.of(
-                        "Token", idToken,
-                        "UserRole", userRole,
-                        "Visible", visible,
-                        "MfaEnable", mfaEnable
-                ), HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
+                response = new ResponseEntity<>(Map.of("Token", idToken, "UserRole", userRole, "Visible", visible, "MfaEnable", mfaEnable), HttpStatus.FOUND); // Use HttpStatus.OK for successful login.
             }
         } catch (Exception e) {
             // If Firebase authentication fails, return the error message with an UNAUTHORIZED status.
             log.error("Firebase login failed for user: {}", login.getEmail(), e);
-            response = new ResponseEntity<>(Map.of(
-                    "Error", e.getMessage()
-            ), HttpStatus.UNAUTHORIZED);
+            response = new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
 
         return response;
@@ -117,11 +108,11 @@ public class AuthController {
             // Before saving the user, ensure that the bidirectional relationship is correctly set.
             // If a customer is present, set the user on the customer to maintain consistency.
             if (user.getCustomer() != null) {
-                user.getCustomer().setUserId(user);
+                user.getCustomer().setUser(user);
             }
             // Similarly, if a mess is present, set the user on the mess.
             if (user.getMess() != null) {
-                user.getMess().setUserId(user);
+                user.getMess().setUser(user);
             }
             // With CascadeType.ALL configured on the User entity, calling createUser will now automatically
             // save the associated Customer and Mess entities. The explicit calls to customerService.createCustomer

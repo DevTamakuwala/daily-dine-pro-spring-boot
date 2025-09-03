@@ -13,6 +13,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "tblBackupCode")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 public class BackupCode {
 
@@ -41,16 +43,4 @@ public class BackupCode {
         this.user = user;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BackupCode that = (BackupCode) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

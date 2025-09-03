@@ -22,9 +22,12 @@ import java.util.Objects;
  * with @Getter, @Setter, and a safe @ToString implementation. The equals() and hashCode()
  * methods are now manually implemented based only on the primary key.
  */
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblUser")
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class User extends AuditableEntity {
@@ -100,31 +103,5 @@ public class User extends AuditableEntity {
         this.mfaEnabled = mfaEnabled;
         this.mfaSecret = mfaSecret;
         this.backupCodes = backupCodes;
-    }
-
-    /**
-     * Overridden equals() method that compares entities based only on their primary key.
-     * This is a best practice for JPA entities to ensure consistent behavior across
-     * different persistence states (transient, managed, detached).
-     * @param o The object to compare.
-     * @return True if the objects are the same, false otherwise.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return userId == user.userId;
-    }
-
-    /**
-     * Overridden hashCode() method that generates a hash based only on the primary key.
-     * This is a best practice for JPA entities to ensure consistent behavior when
-     * managed in collections by the persistence context.
-     * @return The hash code of the entity's ID.
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId);
     }
 }

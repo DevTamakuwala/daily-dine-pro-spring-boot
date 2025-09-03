@@ -1,12 +1,17 @@
 package io.github.devtamakuwala.dailydine.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.github.devtamakuwala.dailydine.model.Mess;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 /**
  * A Data Transfer Object (DTO) for transferring information about unverified mess owners.
  * This DTO is used to send a simplified view of the user to the client, without exposing the full User entity.
+ * It provides a clear and concise representation of the data needed for the client to display unverified mess owners.
  */
 @Data
 @AllArgsConstructor
@@ -20,6 +25,10 @@ public class UnverifiedMessOwnerDTO {
     private String firstName;
     // The user's last name.
     private String lastName;
-    // The user's phone number.
-    private long phoneNo;
+    // The mess associated with the user.
+    private Mess mess;
+    // The date and time when the user was registered.
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "UTC")
+    private Instant createdAt;
+
 }

@@ -3,26 +3,30 @@ package io.github.devtamakuwala.dailydine.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.github.devtamakuwala.dailydine.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a User in the application.
  * This entity now extends AuditableEntity to automatically inherit the createdBy, createdAt,
- * modifiedBy, and modifiedAt fields. This approach centralizes the auditing logic,
- * removes code duplication, and leverages Spring Data JPA's automatic auditing capabilities.
- * The old, manually managed audit fields have been removed in favor of this more robust system.
+ * modifiedBy, and modifiedAt fields.
+ *
+ * REFACTORING NOTE:
+ * The @Data annotation was removed from this entity to prevent issues with bidirectional
+ * relationships in JPA. @Data generates a problematic equals() and hashCode() implementation
+ * that can cause infinite loops and persistence context corruption. It has been replaced
+ * with @Getter, @Setter, and a safe @ToString implementation. The equals() and hashCode()
+ * methods are now manually implemented based only on the primary key.
  */
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblUser")
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"mess", "customer", "backupCodes"})
 @AllArgsConstructor
 @NoArgsConstructor
 public class User extends AuditableEntity {
@@ -40,18 +44,20 @@ public class User extends AuditableEntity {
     /**
      * The mess associated with this user.
      * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated Mess object from the database when it is explicitly accessed.
-     * - @JsonManagedReference: Prevents infinite recursion during JSON serialization by marking this as the "front" part of the relationship.
+     * - @JsonManagedReference("user-mess"): This is the "front" part of the reference, which prevents a serialization loop.
+     *   The name "user-mess" must match the name in the @JsonBackReference in the Mess entity.
      */
-    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("user-mess")
     private Mess mess;
     /**
      * The customer associated with this user.
      * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated Customer object from the database when it is explicitly accessed.
-     * - @JsonManagedReference: Prevents infinite recursion during JSON serialization by marking this as the "front" part of the relationship.
+     * - @JsonManagedReference("user-customer"): This is the "front" part of the reference, which prevents a serialization loop.
+     *   The name "user-customer" must match the name in the @JsonBackReference in the Customer entity.
      */
-    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("user-customer")
     private Customer customer;
     @Column(nullable = false)
     @ColumnDefault("0")
@@ -61,10 +67,11 @@ public class User extends AuditableEntity {
     /**
      * A list of backup codes for the user.
      * - fetch = FetchType.LAZY: Optimizes performance by only loading the backup codes from the database when they are explicitly accessed.
-     * - @JsonManagedReference: Prevents infinite recursion during JSON serialization by marking this as the "front" part of the relationship.
+     * - @JsonManagedReference("user-backup-codes"): This is the "front" part of the reference, which prevents a serialization loop.
+     *   The name "user-backup-codes" must match the name in the @JsonBackReference in the BackupCode entity.
      */
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference("user-backup-codes")
     private List<BackupCode> backupCodes = new ArrayList<>();
 
     public User(int userId, String email, String password, String firstName, String lastName, long phoneNo, Role role, boolean active, Customer customer, boolean mfaEnabled, String mfaSecret, List<BackupCode> backupCodes) {
@@ -95,5 +102,31 @@ public class User extends AuditableEntity {
         this.mfaEnabled = mfaEnabled;
         this.mfaSecret = mfaSecret;
         this.backupCodes = backupCodes;
+    }
+
+    /**
+     * Overridden equals() method that compares entities based only on their primary key.
+     * This is a best practice for JPA entities to ensure consistent behavior across
+     * different persistence states (transient, managed, detached).
+     * @param o The object to compare.
+     * @return True if the objects are the same, false otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId == user.userId;
+    }
+
+    /**
+     * Overridden hashCode() method that generates a hash based only on the primary key.
+     * This is a best practice for JPA entities to ensure consistent behavior when
+     * managed in collections by the persistence context.
+     * @return The hash code of the entity's ID.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId);
     }
 }

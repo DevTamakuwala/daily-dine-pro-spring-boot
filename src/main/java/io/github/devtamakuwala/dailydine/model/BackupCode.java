@@ -12,9 +12,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "tblBackupCode")
-@Getter
-@Setter
-@ToString(exclude = "user")
+@Data
 @NoArgsConstructor
 public class BackupCode {
 

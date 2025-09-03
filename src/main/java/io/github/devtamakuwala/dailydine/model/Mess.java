@@ -23,9 +23,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "tblMess")
-@Getter
-@Setter
-@ToString(exclude = "user")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Mess extends AuditableEntity {

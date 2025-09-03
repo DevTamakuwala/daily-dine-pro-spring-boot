@@ -3,6 +3,7 @@ package io.github.devtamakuwala.dailydine.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
@@ -18,8 +19,7 @@ import java.time.Instant;
  * By having other entities (like User, Customer, Mess) extend this class,
  * we avoid code duplication and ensure a consistent approach to auditing across the application.
  */
-@Getter
-@Setter
+@Data
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity {

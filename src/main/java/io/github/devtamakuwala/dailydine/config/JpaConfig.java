@@ -10,18 +10,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * It is the single, authoritative source for enabling and configuring JPA auditing.
  */
 @Configuration
-// @EnableJpaAuditing is placed here to activate the auditing feature for the entire application.
-// It was removed from the main application class to prevent bean definition conflicts and keep configuration clean.
-// The 'auditorAwareRef' attribute points to the bean that will provide the user IDs.
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class JpaConfig {
 
     /**
      * This method creates and configures the AuditorAware bean.
-     * The bean is now correctly typed to AuditorAware<Integer> to align with the Integer user ID type.
-     * Spring Data JPA calls this bean to get the current user's ID for populating the createdBy and modifiedBy fields.
-     *
-     * @return An instance of our custom AuditorAwareImpl, which provides the current user's ID as an Integer.
      */
     @Bean
     public AuditorAware<Integer> auditorProvider() {

@@ -15,6 +15,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+
+/**
+ * Firebase filter to authenticate firebase authentication token passed from front end as a Bearer token
+ * */
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     @Override

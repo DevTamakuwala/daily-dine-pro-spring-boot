@@ -31,6 +31,10 @@ public class MessController {
     @Autowired
     private UserService userService;
 
+
+    /**
+     * Get all Unverified Mess owners
+     * */
     /**
      * Retrieves a list of all unverified mess owners.
      * This endpoint is intended for administrators to review and approve new mess accounts.
@@ -46,6 +50,10 @@ public class MessController {
         return new ResponseEntity<>(messService.getAllUnverifiedMess(), HttpStatus.OK);
     }
 
+
+    /**
+     * Get all Mess owners
+     * */
     /**
      * Retrieves a list of all messes.
      * @param authentication The authentication principal, used to ensure the user is authorized.
@@ -59,6 +67,10 @@ public class MessController {
         return new ResponseEntity<>(messService.getAllMess(), HttpStatus.OK);
     }
 
+
+    /**
+     * Get Mess by ID
+     * */
     /**
      * Retrieves a single mess by its user ID.
      * @param authentication The authentication principal, used to ensure the user is authorized.
@@ -78,6 +90,10 @@ public class MessController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+
+    /**
+     * Update Mess Data
+     * */
     /**
      * Updates the data for a specific mess.
      * Note: This endpoint accepts the full User object, which is not ideal for security and maintainability.

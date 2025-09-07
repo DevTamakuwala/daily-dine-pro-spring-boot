@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
+/**
+ * This is configuration of the firebase in our application
+ * */
 @Configuration
 public class FirebaseConfig {
 

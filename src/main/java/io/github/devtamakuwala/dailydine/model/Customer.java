@@ -9,16 +9,7 @@ import lombok.*;
 import java.util.Date;
 
 /**
- * Represents a Customer in the application, containing customer-specific details.
- * This entity extends AuditableEntity to automatically gain the createdBy, createdAt,
- * modifiedBy, and modifiedAt fields.
- * <p>
- * REFACTORING NOTE:
- * The @Data annotation was removed from this entity to prevent issues with bidirectional
- * relationships in JPA. @Data generates a problematic equals() and hashCode() implementation
- * that can cause infinite loops and persistence context corruption. It has been replaced
- * with @Getter, @Setter, and a safe @ToString implementation. The equals() and hashCode()
- * methods are now manually implemented based only on the primary key.
+ * Model for Customer
  */
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -53,6 +44,5 @@ public class Customer extends AuditableEntity {
     private SubscriptionStatus status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date dateOfBirth;
-//    private boolean visible;
 
 }

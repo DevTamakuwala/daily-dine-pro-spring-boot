@@ -11,6 +11,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+
+/**
+ * This is security configuration class for our applications
+ * */
 @Configuration
 @EnableWebMvc
 public class SecurityConfig {

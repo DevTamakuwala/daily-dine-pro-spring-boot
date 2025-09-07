@@ -20,6 +20,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
+    /**
+     * Get All users
+     * */
     /**
      * Retrieves a list of all users in the system.
      * This is typically an admin-only function.
@@ -31,19 +35,4 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    /**
-     * Updates the profile of a specific user.
-     * // It should validate the input, call the UserService to perform the update,
-     * // and return a proper ResponseEntity with the updated user or an error status.
-     *
-     * @param userId The ID of the user to be updated.
-     * @param user   A User object containing the new data for the user.
-     * @return A ResponseEntity containing the updated User object or an error status.
-     */
-    @PutMapping("users/update/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User user){
-        // The business logic for updating the user should be handled in the UserService.
-        // For example: return ResponseEntity.ok(userService.updateUser(userId, user));
-        return null;
-    }
 }

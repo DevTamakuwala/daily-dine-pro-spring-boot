@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * DTO for Login
+ * */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

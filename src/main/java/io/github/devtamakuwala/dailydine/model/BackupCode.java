@@ -6,6 +6,10 @@ import lombok.*;
 
 import java.util.Objects;
 
+
+/**
+ * Model for backup codes
+ * */
 /**
  * Represents a single-use backup code for a user.
  * This entity is used to store hashed backup codes that can be used to log in if the user loses access to their authenticator app.

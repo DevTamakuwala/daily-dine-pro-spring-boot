@@ -4,6 +4,7 @@ import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,12 +18,11 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BackupCodeService backupCodeService;
 
     /**
      * Retrieves all users from the database.
-     * This method delegates the call to the repository to fetch all user records.
-     *
-     * @return A List of all User objects.
      */
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -30,9 +30,6 @@ public class UserService {
 
     /**
      * Creates or updates a user in the database.
-     * The JpaRepository's save() method handles both the creation of new users
-     * and the update of existing ones if an ID is present.
-     * @param user The User entity to be saved.
      */
     public void createUser(User user) {
         userRepository.save(user);
@@ -40,23 +37,28 @@ public class UserService {
 
     /**
      * Retrieves a user by their email address.
-     * This method delegates the call to the custom findByEmail method in the UserRepository.
-     * @param email The email of the user to find.
-     * @return The User object if found, otherwise null.
      */
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     /**
-     * Retrieves a user by their unique ID.
-     * The orElse(null) part ensures that if no user is found, null is returned,
-     * which can be handled by the calling code.
-     * @param id The ID of the user to find.
-     * @return The User object if found, otherwise null.
+     * Retrieves a user by their unique ID.s
      */
     public User getUserByUserId(int id) {
         return userRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Disables the MFA by the user
+     * */
+    @Transactional
+    public void disableMfa(User user) {
+        backupCodeService.removeBackupCodeByUserId(user.getUserId());
+
+        user.setMfaEnabled(false);
+        user.setMfaSecret(null);
+        userRepository.save(user);
     }
 
 }

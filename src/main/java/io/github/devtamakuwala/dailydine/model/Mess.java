@@ -10,17 +10,8 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Represents a Mess (food service provider) in the application.
- * This entity extends AuditableEntity to automatically inherit the createdBy, createdAt,
- * modifiedBy, and modifiedAt fields.
- *
- * REFACTORING NOTE:
- * The @Data annotation was removed from this entity to prevent issues with bidirectional
- * relationships in JPA. @Data generates a problematic equals() and hashCode() implementation
- * that can cause infinite loops and persistence context corruption. It has been replaced
- * with @Getter, @Setter, and a safe @ToString implementation. The equals() and hashCode()
- * methods are now manually implemented based only on the primary key.
- */
+ * Model for Mess
+ * */
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblMess")

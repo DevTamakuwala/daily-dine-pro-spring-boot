@@ -13,9 +13,7 @@ import java.util.Base64;
 
 /**
  * This service provides functionality to decrypt data using an RSA private key.
- * It is specifically used to decrypt passwords sent from the client-side before they are
- * used for authentication with Firebase.
- */
+ * */
 @Service
 public class DecryptionService {
 

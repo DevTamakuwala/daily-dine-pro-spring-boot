@@ -28,11 +28,6 @@ public class FirebaseAuthService {
 
     /**
      * Authenticates a user with Firebase using their email and password.
-     *
-     * @param email    The user's email address.
-     * @param password The user's plain-text password (after decryption).
-     * @return The Firebase ID token for the authenticated user.
-     * @throws RuntimeException if the login fails or if the error response cannot be parsed.
      */
     public String loginAndGetIdToken(String email, String password) {
         // Create the request payload for the Firebase API.
@@ -73,11 +68,6 @@ public class FirebaseAuthService {
 
     /**
      * Registers a new user with Firebase using an email and password.
-     *
-     * @param email    The new user's email address.
-     * @param password The new user's plain-text password (after decryption).
-     * @return The Firebase ID token for the newly created user.
-     * @throws RuntimeException if the registration fails or if the error response cannot be parsed.
      */
     public String registerUser(String email, String password) {
         // Create the request payload for the Firebase API.

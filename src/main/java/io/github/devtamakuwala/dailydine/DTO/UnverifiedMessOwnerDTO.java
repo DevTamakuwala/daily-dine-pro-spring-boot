@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+
+/**
+ * DTO for unverified Mess owners
+ * */
 /**
  * A Data Transfer Object (DTO) for transferring information about unverified mess owners.
  * This DTO is used to send a simplified view of the user to the client, without exposing the full User entity.

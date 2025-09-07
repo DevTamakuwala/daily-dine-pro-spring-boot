@@ -35,9 +35,7 @@ public class MfaService {
 
     /**
      * Generates a new random 32-character secret key for MFA.
-     *
-     * @return A new MFA secret as a string.
-     */
+     * */
     public String generateNewSecret() {
         SecretGenerator secretGenerator = new DefaultSecretGenerator();
         return secretGenerator.generate();
@@ -45,10 +43,6 @@ public class MfaService {
 
     /**
      * Generates a QR code image data URI for the user to scan with their authenticator app.
-     *
-     * @param secret The MFA secret.
-     * @param email The user's email address.
-     * @return A data URI for the QR code image.
      */
     public String generateQrCodeImageUri(String secret, String email) {
         QrData data = new QrData.Builder()
@@ -65,7 +59,7 @@ public class MfaService {
         try {
             imageData = generator.generate(data);
         } catch (QrGenerationException e) {
-            log.error("Error while generating QR code: " + e.getMessage());
+            log.error("Error while generating QR code: {}", e.getMessage());
         }
 
         return getDataUriForImage(imageData, generator.getImageMimeType());
@@ -73,29 +67,21 @@ public class MfaService {
 
     /**
      * Generates a list of 10 random, 10-digit backup codes for MFA.
-     *
-     * @return A list of 10 backup codes.
      */
     public List<String> generateBackupCodes() {
         SecureRandom random = new SecureRandom();
         return IntStream.range(0, 10)
                 .mapToObj(i -> {
-                    // Generate an 10-digit code (from 0 to 99,999,999)
-                    int code = random.nextInt(100_000_000);
-                    String codeStr = String.format("%10d", code); // Pad with leading zeros if needed
-
-                    // Format the code for readability
-                    return codeStr.substring(0, 5) + "-" + codeStr.substring(5);
+                    // Generate a 10-digit code (from 0 to 9,999,999,999)
+                    long code = Math.abs(random.nextLong() % 10_000_000_000L);
+                    // Format the number as a 10-digit string, padded with leading zeros
+                    return String.format("%010d", code);
                 })
                 .collect(Collectors.toList());
     }
 
     /**
      * Verifies a backup code provided by the user.
-     *
-     * @param user The user attempting to log in.
-     * @param code The backup code to verify.
-     * @return True if the code is valid and has not been used before, false otherwise.
      */
     public boolean verifyBackupCode(User user, String code) {
         // Find a stored code that matches the provided code
@@ -111,10 +97,6 @@ public class MfaService {
 
     /**
      * Verifies the 6-digit Time-based One-Time Password (TOTP) provided by the user.
-     *
-     * @param secret The user's MFA secret.
-     * @param code The 6-digit code to verify.
-     * @return True if the code is valid, false otherwise.
      */
     public boolean isOtpValid(String secret, String code) {
         TimeProvider timeProvider = new SystemTimeProvider();

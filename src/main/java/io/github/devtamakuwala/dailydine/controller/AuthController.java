@@ -36,6 +36,10 @@ public class AuthController {
     @Autowired
     private MfaService mfaService;
 
+
+    /**
+     * Login for user
+     * */
     /**
      * Handles user login requests.
      *
@@ -84,6 +88,10 @@ public class AuthController {
         return response;
     }
 
+
+    /**
+     * Register User
+     * */
     /**
      * Handles new user registration requests.
      * This endpoint creates a user in Firebase Authentication.
@@ -131,6 +139,10 @@ public class AuthController {
         return response;
     }
 
+
+    /**
+     * Login with back up code
+     * */
     /**
      * Handles user login with a backup code.
      * This endpoint allows users to log in with a backup code if they don't have access to their authenticator app.

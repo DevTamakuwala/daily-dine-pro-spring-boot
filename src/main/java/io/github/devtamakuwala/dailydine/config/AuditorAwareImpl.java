@@ -10,20 +10,14 @@ import java.util.Optional;
 
 /**
  * This class implements the AuditorAware interface from Spring Data JPA.
- * Its purpose is to provide the application with the identity of the current user,
- * so that the createdBy and modifiedBy fields in our auditable entities can be populated automatically.
- * This implementation is specifically configured to handle Integer user IDs.
  */
-// The generic type is set to <Integer> to match the data type of the User entity's primary key.
+
 public class AuditorAwareImpl implements AuditorAware<Integer> {
 
     private static final Logger log = LoggerFactory.getLogger(AuditorAwareImpl.class);
 
     /**
      * This is the core method of the AuditorAware interface.
-     * Spring Data JPA will call this method whenever it needs to know who the current user is.
-     *
-     * @return An Optional containing the current user's ID as an Integer.
      */
     @Override
     public Optional<Integer> getCurrentAuditor() {

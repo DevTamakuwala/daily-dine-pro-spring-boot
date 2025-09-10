@@ -43,6 +43,5 @@ public class Menu {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private String availableTill;
     private int price;
-    @ColumnDefault("false")
     private boolean expired;
 }

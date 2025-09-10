@@ -2,9 +2,7 @@ package io.github.devtamakuwala.dailydine.controller;
 
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.MessService;
-import io.github.devtamakuwala.dailydine.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +23,11 @@ import java.util.Map;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.OPTIONS})
 public class MessController {
 
-    @Autowired
-    private MessService messService;
-    @Autowired
-    private UserService userService;
+    private final MessService messService;
+
+    public MessController(MessService messService) {
+        this.messService = messService;
+    }
 
 
     /**
@@ -57,7 +56,7 @@ public class MessController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getMess(@PathVariable("id") int id) {
-        return userService.getUserByUserId(id);
+        return messService.getMessByMessId(id);
     }
 
 

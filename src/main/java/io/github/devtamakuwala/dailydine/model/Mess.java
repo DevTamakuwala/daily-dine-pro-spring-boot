@@ -2,16 +2,18 @@ package io.github.devtamakuwala.dailydine.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.google.firebase.database.annotations.NotNull;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
-import java.util.Objects;
+import java.util.List;
 
 /**
  * Model for Mess
- * */
+ *
+ */
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblMess")
@@ -30,8 +32,8 @@ public class Mess extends AuditableEntity {
      * - fetch = FetchType.LAZY: Optimizes performance by only loading the associated User object from the database when it is explicitly accessed.
      * - @JoinColumn: Specifies the foreign key column in the `tblMess` table.
      * - @JsonBackReference("user-mess"): This is the "back" part of the reference, which prevents a serialization loop.
-     *   The name "user-mess" must match the name in the @JsonManagedReference in the User entity.
-     *
+     * The name "user-mess" must match the name in the @JsonManagedReference in the User entity.
+     * <p>
      * REFACTORING NOTE:
      * The field was renamed from 'userId' to 'user' to more accurately reflect that it holds a User object,
      * not just the ID. This improves code clarity and consistency.
@@ -60,5 +62,9 @@ public class Mess extends AuditableEntity {
     private byte[] imageData;
     private String latitude;
     private String longitude;
+
+    @OneToMany(mappedBy = "mess", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("mess-menu")
+    private List<Menu> menu;
 //    private boolean visible;
 }

@@ -2,7 +2,9 @@ package io.github.devtamakuwala.dailydine.service;
 
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.repository.UserRepository;
-import org.springframework.http.HttpStatus;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,42 +28,45 @@ public class UserService {
     }
 
     /**
-     * Retrieves all users from the database.
+     * Retrieves all users from the database and caches the result.
+     * The result is cached in the "users" cache with the key "'all'".
      */
+    @Cacheable(value = "users", key = "'all'")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     /**
      * Creates or updates a user in the database.
+     * Evicts the "users" cache and the specific user's cache entries by both ID and email.
      */
+    @Caching(evict = {
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "user", key = "#user.email"),
+            @CacheEvict(value = "user", key = "#user.userId")
+    })
     public void createUser(User user) {
         userRepository.save(user);
     }
 
     /**
-     * Retrieves a user by their email address.
+     * Retrieves a user by their email address and caches the result.
+     * The result is cached in the "user" cache with the key being the email.
      */
+    @Cacheable(value = "user", key = "#email")
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     /**
-     * Retrieves a user by their unique ID.s
+     * Disables two-factor authentication for a user.
+     * Evicts the "users" cache and the specific user's cache entries by both ID and email.
      */
-    public ResponseEntity<?> getUserByUserId(int id) {
-        User user = userRepository.findById(id).orElse(null);
-
-        if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    /**
-     * Disables the MFA by the user
-     *
-     */
+    @Caching(evict = {
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "user", key = "#user.email"),
+            @CacheEvict(value = "user", key = "#user.userId")
+    })
     @Transactional
     public void disableMfa(User user) {
         backupCodeService.removeBackupCodeByUserId(user.getUserId());
@@ -71,4 +76,16 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Retrieves a user by their ID and caches the result.
+     * The result is cached in the "user" cache with the key being the user ID.
+     */
+    @Cacheable(value = "user", key = "#id")
+    public ResponseEntity<?> getUser(int id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.badRequest().build();
+    }
 }

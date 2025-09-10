@@ -2,7 +2,8 @@ package io.github.devtamakuwala.dailydine.service;
 
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +17,13 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private BackupCodeService backupCodeService;
+    private final UserRepository userRepository;
+    private final BackupCodeService backupCodeService;
+
+    public UserService(UserRepository userRepository, BackupCodeService backupCodeService) {
+        this.userRepository = userRepository;
+        this.backupCodeService = backupCodeService;
+    }
 
     /**
      * Retrieves all users from the database.
@@ -45,13 +49,19 @@ public class UserService {
     /**
      * Retrieves a user by their unique ID.s
      */
-    public User getUserByUserId(int id) {
-        return userRepository.findById(id).orElse(null);
+    public ResponseEntity<?> getUserByUserId(int id) {
+        User user = userRepository.findById(id).orElse(null);
+
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     /**
      * Disables the MFA by the user
-     * */
+     *
+     */
     @Transactional
     public void disableMfa(User user) {
         backupCodeService.removeBackupCodeByUserId(user.getUserId());

@@ -2,10 +2,9 @@ package io.github.devtamakuwala.dailydine.controller;
 
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,21 +16,19 @@ import java.util.List;
 @RequestMapping("/api/")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
 
     /**
      * Get All users
-     * */
-    /**
-     * Retrieves a list of all users in the system.
-     * This is typically an admin-only function.
      *
-     * @return A List of all User objects.
      */
     @GetMapping("users")
-    public List<User> getAllUsers(Authentication authentication){
+    public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 

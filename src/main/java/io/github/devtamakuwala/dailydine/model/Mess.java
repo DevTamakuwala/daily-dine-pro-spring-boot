@@ -2,7 +2,7 @@ package io.github.devtamakuwala.dailydine.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.firebase.database.annotations.NotNull;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,6 +22,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Mess extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,7 +65,6 @@ public class Mess extends AuditableEntity {
     private String longitude;
 
     @OneToMany(mappedBy = "mess", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("mess-menu")
     private List<Menu> menu;
 //    private boolean visible;
 }

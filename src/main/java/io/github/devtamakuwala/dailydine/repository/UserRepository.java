@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     /**
      * Finds all unverified mess owners and projects them into a DTO.
      */
-    @Query("SELECT new io.github.devtamakuwala.dailydine.DTO.UnverifiedMessOwnerDTO(u.userId, u.email, u.firstName, u.lastName, u.mess, u.createdAt) FROM User u WHERE u.role = 'MESS_OWNER' AND u.active = false")
+    @Query("SELECT new io.github.devtamakuwala.dailydine.DTO.UnverifiedMessOwnerDTO(u.userId, u.email, u.firstName, u.lastName, u.mess, u.createdAt) FROM User u WHERE u.role = 'MessOwner' AND u.active = false")
     @EntityGraph(attributePaths = {"mess"})
     List<UnverifiedMessOwnerDTO> findAllUnverifiedMessOwners();
 
@@ -31,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     /**
      * Finds all users who are mess owners
      */
-    @Query("select u from User u where u.role='MESS_OWNER'")
+    @Query("select u from User u where u.role='MessOwner'")
     @EntityGraph(attributePaths = {"mess"})
     List<User> findAllMess();
 }

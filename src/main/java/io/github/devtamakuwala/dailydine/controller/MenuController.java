@@ -36,13 +36,18 @@ public class MenuController {
         return menuService.getInactiveMenus();
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> addMenu(@RequestBody Menu menu){
-        return menuService.addMenu(menu);
+    @PostMapping("/mess/{messId}")
+    public ResponseEntity<?> addMenu(@RequestBody Menu menu, @PathVariable int messId) {
+        return menuService.addMenu(menu, messId);
     }
 
-    @PutMapping("")
-    public ResponseEntity<?> updateMenu(@RequestBody Menu menu){
-        return menuService.updateMenu(menu);
+    @PutMapping("/mess/{messId}")
+    public ResponseEntity<?> updateMenu(@RequestBody Menu menu, @PathVariable int messId) {
+        return menuService.updateMenu(menu, messId);
+    }
+
+    @GetMapping("/mess/{messId}/date/{date}")
+    public ResponseEntity<?> getMenuForMessByDate(@PathVariable String date, @PathVariable int messId) {
+        return menuService.getMenuForMessByDate(date, messId);
     }
 }

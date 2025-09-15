@@ -1,21 +1,27 @@
 package io.github.devtamakuwala.dailydine.service;
 
 import io.github.devtamakuwala.dailydine.model.Menu;
+import io.github.devtamakuwala.dailydine.model.Mess;
 import io.github.devtamakuwala.dailydine.repository.MenuRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final MessService messService;
 
-    public MenuService(MenuRepository menuRepository) {
+    public MenuService(MenuRepository menuRepository, MessService messService) {
         this.menuRepository = menuRepository;
+        this.messService = messService;
     }
 
     /**
@@ -50,9 +56,12 @@ public class MenuService {
      * This ensures that subsequent requests for menus will fetch fresh data.
      */
     @CacheEvict(value = "menus", allEntries = true)
-    public ResponseEntity<?> addMenu(Menu menu) {
+    public ResponseEntity<?> addMenu(Menu menu, int messId) {
 
         if (menu != null) {
+            Mess mess = (Mess) messService.getMessByMessId(messId).getBody();
+            menu.setMess(mess);
+            menu.setDate(menu.getDate());
             menuRepository.save(menu);
             return ResponseEntity.ok().build();
         }
@@ -65,10 +74,31 @@ public class MenuService {
      * This ensures that subsequent requests for menus will fetch fresh data.
      */
     @CacheEvict(value = "menus", allEntries = true)
-    public ResponseEntity<?> updateMenu(Menu menu) {
+    public ResponseEntity<?> updateMenu(Menu menu, int messId) {
         if (menu != null) {
+            Mess mess = (Mess) messService.getMessByMessId(messId).getBody();
+            menu.setMess(mess);
+            menu.setAvailableFrom(menu.getAvailableFrom());
+            menu.setAvailableTill(menu.getAvailableTill());
+            menu.setDate(menu.getDate());
+            menu.setDescription(menu.getDescription());
+            menu.setExpired(menu.isExpired());
             menuRepository.save(menu);
             return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    public ResponseEntity<?> getMenuForMessByDate(String date, int messId) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        try {
+            Date date1 = simpleDateFormat.parse(date);
+            Mess mess = (Mess) messService.getMessByMessId(messId).getBody();
+            if (mess != null) {
+                return ResponseEntity.ok(menuRepository.getMenuByDateAndMess(date1, mess));
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
         return ResponseEntity.badRequest().build();
     }

@@ -1,11 +1,9 @@
 package io.github.devtamakuwala.dailydine.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.*;
 import io.github.devtamakuwala.dailydine.enums.MealType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Date;
 
@@ -20,6 +18,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Data
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Menu {
 
     @Id
@@ -28,8 +27,16 @@ public class Menu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mess_id", referencedColumnName = "messId")
-    @JsonBackReference("mess-menu")
+    @JsonIgnore
     private Mess mess;
+
+    @JsonProperty("mess")
+    public Integer getMessId() {
+        if (mess != null) {
+            return mess.getMessId();
+        }
+        return null;
+    }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date date;

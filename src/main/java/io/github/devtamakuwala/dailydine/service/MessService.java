@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,7 +56,11 @@ public class MessService {
      */
     @Cacheable(value = "messes", key = "'all'")
     public ResponseEntity<?> getAllMess() {
-        return new ResponseEntity<>(userRepository.findAllMess(), HttpStatus.OK);
+        List<User> user = userRepository.findAllMess();
+        if (user != null){
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     /**

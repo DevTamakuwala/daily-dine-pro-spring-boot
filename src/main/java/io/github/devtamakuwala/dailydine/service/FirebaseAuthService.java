@@ -22,6 +22,8 @@ public class FirebaseAuthService {
     private static final String FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + FIREBASE_API_KEY;
     // The Firebase REST API endpoint for creating a new user account.
     private static final String FIREBASE_SIGNUP_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + FIREBASE_API_KEY;
+    // The Firebase REST API endpoint for changing a user's password.
+    private static final String FIREBASE_RESET_URL = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -102,5 +104,22 @@ public class FirebaseAuthService {
                 throw new RuntimeException("Error parsing Firebase error response", ex);
             }
         }
+    }
+
+    public ResponseEntity<?> sendPasswordResetEmail(String email) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        String url = FIREBASE_RESET_URL + FIREBASE_API_KEY;
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("requestType", "PASSWORD_RESET");
+        body.put("email", email);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        return restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
     }
 }

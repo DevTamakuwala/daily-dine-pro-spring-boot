@@ -58,4 +58,9 @@ public class AuthController {
         return authService.loginWithBackUpCodes(login);
     }
 
+    @PutMapping("/password/{email}")
+    public ResponseEntity<?> updatePassword(@PathVariable("email") String email) {
+        return authService.updatePassword(email);
+    }
+
 }

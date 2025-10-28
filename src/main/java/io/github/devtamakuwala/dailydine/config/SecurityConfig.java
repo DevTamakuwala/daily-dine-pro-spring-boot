@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         // Authentication-related endpoints are open to all users
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Reset password endpoints require authentication
+                        .requestMatchers("/api/auth/password/**").authenticated()
                         // All other API endpoints require authentication
                         .requestMatchers("/api/**").authenticated()
                         // Any other request not matching the above rules must be authenticated

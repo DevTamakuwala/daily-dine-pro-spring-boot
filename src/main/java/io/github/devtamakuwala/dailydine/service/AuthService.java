@@ -4,7 +4,6 @@ import io.github.devtamakuwala.dailydine.DTO.BackupCodeLoginDTO;
 import io.github.devtamakuwala.dailydine.DTO.LoginDTO;
 import io.github.devtamakuwala.dailydine.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,16 +16,20 @@ import java.util.Map;
  * This is a service class for auth controller
  * in this service the actual logic of the auth endpoints like login, registration, login with backup codes have been implemented
  * This is called layered architecture (a.k.a. 3 tier architecture)
- * */
+ *
+ */
 @Slf4j
 @Service
 public class AuthService {
-    @Autowired
-    private FirebaseAuthService firebaseAuthService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private MfaService mfaService;
+    private final FirebaseAuthService firebaseAuthService;
+    private final UserService userService;
+    private final MfaService mfaService;
+
+    public AuthService(FirebaseAuthService firebaseAuthService, UserService userService, MfaService mfaService) {
+        this.firebaseAuthService = firebaseAuthService;
+        this.userService = userService;
+        this.mfaService = mfaService;
+    }
 
     /**
      * Handles user login with a backup code.
@@ -36,7 +39,7 @@ public class AuthService {
      * @return A ResponseEntity containing the Firebase ID token, user role, and visibility on successful authentication,
      * or an error message with an appropriate HTTP status code on failure.
      */
-    public ResponseEntity<Map<String, Object>> loginWithBackUpCodes(BackupCodeLoginDTO login){
+    public ResponseEntity<Map<String, Object>> loginWithBackUpCodes(BackupCodeLoginDTO login) {
         Map<String, Object> response = new HashMap<>();
         try {
             // First, verify the user's password
@@ -81,7 +84,7 @@ public class AuthService {
      * @return A ResponseEntity containing the new user's Firebase ID token on successful registration,
      * or an error message with an appropriate HTTP status code on failure.
      */
-    public ResponseEntity<String> register(User user){
+    public ResponseEntity<String> register(User user) {
         // The password from the client is expected to be encrypted.
         // It is decrypted here before being sent to Firebase for user creation.
         try {
@@ -127,11 +130,11 @@ public class AuthService {
      * @return A ResponseEntity containing a map with the Firebase ID token, user role, visibility, and MFA status on successful authentication,
      * or an error message with an appropriate HTTP status code on failure.
      */
-    public ResponseEntity<?> login(LoginDTO login){
+    public ResponseEntity<?> login(LoginDTO login) {
         // The password from the client is expected to be encrypted.
         // It is decrypted here before being sent to Firebase for verification.
         try {
-            if (!login.getPassword().equals("dev@1234")) {
+            if (!login.getPassword().equals("jenil@1234")) {
                 login.setPassword(DecryptionService.decryptPassword(login.getPassword()));
             }
         } catch (Exception e) {
@@ -164,6 +167,22 @@ public class AuthService {
             response = new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
 
+        return response;
+    }
+
+    public ResponseEntity<?> updatePassword(String email) {
+        ResponseEntity<?> response;
+
+        try {
+            User user = userService.getUserByEmail(email);
+            if (user != null) {
+                response = firebaseAuthService.sendPasswordResetEmail(email);
+            } else  {
+                response = new ResponseEntity<>(Map.of("Error", "User not found"), HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            response = new ResponseEntity<>(Map.of("Error", e.getMessage()), HttpStatus.UNAUTHORIZED);
+        }
         return response;
     }
 }

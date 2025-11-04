@@ -13,10 +13,8 @@ import java.util.Objects;
 /**
  * Represents a User in the application.
  */
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblUser")
-@Data
 @Getter
 @Setter
 @AllArgsConstructor
@@ -94,5 +92,29 @@ public class User extends AuditableEntity {
         this.mfaEnabled = mfaEnabled;
         this.mfaSecret = mfaSecret;
         this.backupCodes = backupCodes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId == user.userId && Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, email);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", role=" + role +
+                ", active=" + active +
+                '}';
     }
 }

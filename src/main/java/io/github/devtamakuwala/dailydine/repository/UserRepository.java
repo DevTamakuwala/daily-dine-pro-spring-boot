@@ -27,6 +27,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @EntityGraph(attributePaths = {"mess"})
     List<UnverifiedMessOwnerDTO> findAllUnverifiedMessOwners();
 
+    /**
+     * Finds all verified mess owners and projects them into a DTO.
+     */
+    @Query("SELECT new io.github.devtamakuwala.dailydine.DTO.UnverifiedMessOwnerDTO(u.userId, u.email, u.firstName, u.lastName, u.mess, u.createdAt) FROM User u WHERE u.role = 'MessOwner' AND u.active = true")
+    @EntityGraph(attributePaths = {"mess"})
+    List<UnverifiedMessOwnerDTO> findAllVerifiedMessOwners();
+
 
     /**
      * Finds all users who are mess owners
@@ -34,4 +41,18 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("select u from User u where u.role='MessOwner'")
     @EntityGraph(attributePaths = {"mess"})
     List<User> findAllMess();
+
+
+    /**
+     * Counts the total number of mess owners who are inactive (pending verification).
+     * This is efficient as it performs a direct count query on the database.
+     */
+    @Query("select count(u) from User u where u.role='MessOwner' and u.active=false")
+    Integer countPendingMessVerification();
+
+    @Query("select count(u) from User u where u.role='MessOwner'")
+    Integer countMess();
+
+    @Query("select count(u) from User u where u.role='Customer'")
+    Integer countAllCustomers();
 }

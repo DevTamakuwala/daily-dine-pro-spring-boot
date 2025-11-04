@@ -1,5 +1,7 @@
 package io.github.devtamakuwala.dailydine.service;
 
+import io.github.devtamakuwala.dailydine.DTO.MessNearbyDTO;
+import io.github.devtamakuwala.dailydine.DTO.UnverifiedMessOwnerDTO;
 import io.github.devtamakuwala.dailydine.model.Mess;
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.repository.MessRepository;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,15 +22,18 @@ import java.util.Map;
 @Service
 public class MessService {
 
+    private static final double EARTH_RADIUS = 6371000;
     final
     UserService userService;
     private final MessRepository repository;
     private final UserRepository userRepository;
+    private final FirebaseAuthService authService;
 
-    public MessService(UserService userService, MessRepository repository, UserRepository userRepository) {
+    public MessService(UserService userService, MessRepository repository, UserRepository userRepository, FirebaseAuthService authService) {
         this.userService = userService;
         this.repository = repository;
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     /**
@@ -47,7 +53,24 @@ public class MessService {
      */
     @Cacheable(value = "unverifiedMess", key = "'unverifiedMess'")
     public ResponseEntity<?> getAllUnverifiedMess() {
-        return new ResponseEntity<>(userRepository.findAllUnverifiedMessOwners(), HttpStatus.OK);
+        List<UnverifiedMessOwnerDTO> unverifiedMessOwnerDTO = userRepository.findAllUnverifiedMessOwners();
+
+        System.out.println(unverifiedMessOwnerDTO);
+        return new ResponseEntity<>(unverifiedMessOwnerDTO, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieves a list of all verified mess owners.
+     * The result is cached in the "verifiedMess" cache.
+     *
+     * @return A ResponseEntity containing a list of verified mess owners.
+     */
+    @Cacheable(value = "verifiedMess", key = "'verifiedMess'")
+    public ResponseEntity<?> getAllVerifiedMess() {
+        List<UnverifiedMessOwnerDTO> unverifiedMessOwnerDTO = userRepository.findAllVerifiedMessOwners();
+
+        System.out.println(unverifiedMessOwnerDTO);
+        return new ResponseEntity<>(unverifiedMessOwnerDTO, HttpStatus.OK);
     }
 
     /**
@@ -57,7 +80,7 @@ public class MessService {
     @Cacheable(value = "messes", key = "'all'")
     public ResponseEntity<?> getAllMess() {
         List<User> user = userRepository.findAllMess();
-        if (user != null){
+        if (user != null) {
             return new ResponseEntity<>(user, HttpStatus.OK);
         }
         return ResponseEntity.notFound().build();
@@ -71,8 +94,8 @@ public class MessService {
      */
     @CacheEvict(value = {"messes", "unverifiedMess"}, allEntries = true)
     public ResponseEntity<?> approveMess(int id, Map<String, String> coordinates) {
-        String latitude = coordinates.get("latitude");
-        String longitude = coordinates.get("longitude");
+        double latitude = Double.parseDouble(coordinates.get("latitude"));
+        double longitude = Double.parseDouble(coordinates.get("longitude"));
 
         User user = userRepository.findById(id).orElse(null);
 
@@ -135,5 +158,15 @@ public class MessService {
             return ResponseEntity.ok(mess);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+
+    public ResponseEntity<?> updatePassword(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user != null && user.isActive()) {
+            return new ResponseEntity<>(authService.sendPasswordResetEmail(user.getEmail()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Invalid email", HttpStatus.BAD_REQUEST);
     }
 }

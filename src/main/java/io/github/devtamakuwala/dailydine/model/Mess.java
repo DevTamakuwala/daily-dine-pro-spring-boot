@@ -9,15 +9,14 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Model for Mess
  *
  */
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblMess")
-@Data
 @Getter
 @Setter
 @AllArgsConstructor
@@ -61,10 +60,31 @@ public class Mess extends AuditableEntity {
     private String imageType;
     @Lob
     private byte[] imageData;
-    private String latitude;
-    private String longitude;
+    private Double latitude;
+    private Double longitude;
 
     @OneToMany(mappedBy = "mess", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Menu> menu;
 //    private boolean visible;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Mess mess = (Mess) o;
+        return messId == mess.messId && Objects.equals(messName, mess.messName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messId, messName);
+    }
+
+    @Override
+    public String toString() {
+        return "Mess{" +
+                "messId=" + messId +
+                ", messName='" + messName + '\'' +
+                '}';
+    }
 }

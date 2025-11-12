@@ -1,5 +1,6 @@
 package io.github.devtamakuwala.dailydine.service;
 
+import io.github.devtamakuwala.dailydine.DTO.MessNearbyDTO;
 import io.github.devtamakuwala.dailydine.DTO.UnverifiedMessOwnerDTO;
 import io.github.devtamakuwala.dailydine.model.Mess;
 import io.github.devtamakuwala.dailydine.model.User;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -158,6 +160,47 @@ public class MessService {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    public List<MessNearbyDTO> getNearbyActiveMess(double lng, double lat, double radius) {
+        radius *= 1000;
+
+        // compute bounding box
+        double radLat = Math.toRadians(lat);
+        double deltaLat = radius / EARTH_RADIUS;
+        double deltaLng = radius / (EARTH_RADIUS * Math.cos(radLat));
+
+        double latMin = lat - Math.toDegrees(deltaLat);
+        double latMax = lat + Math.toDegrees(deltaLat);
+        double lngMin = lng - Math.toDegrees(deltaLng);
+        double lngMax = lng + Math.toDegrees(deltaLng);
+
+        // Try spatial version
+        List<Object[]> spatial = repository.findNearbyActiveWithDistanceSpatial(
+                lng, lat, latMin, latMax, lngMin, lngMax, radius
+        );
+        if (spatial != null && !spatial.isEmpty()) {
+            return mapToDTOs(spatial);
+        }
+
+        // else fallback to Haversine
+        List<Object[]> haversine = repository.findNearbyActiveWithDistanceHaversine(
+                lng, lat, latMin, latMax, lngMin, lngMax, radius
+        );
+        return mapToDTOs(haversine);
+    }
+
+    private List<MessNearbyDTO> mapToDTOs(List<Object[]> rows) {
+        List<MessNearbyDTO> dtos = new ArrayList<>();
+        for (Object[] row : rows) {
+            MessNearbyDTO dto = new MessNearbyDTO();
+            dto.setMessId((Integer) row[0]);
+            dto.setMessName((String) row[1]);
+            dto.setLatitude((Double) row[2]);
+            dto.setLongitude((Double) row[3]);
+            dto.setDistanceMeters(((Number) row[4]).doubleValue());
+            dtos.add(dto);
+        }
+        return dtos;
+    }
 
     public ResponseEntity<?> updatePassword(String email) {
         User user = userRepository.findByEmail(email);

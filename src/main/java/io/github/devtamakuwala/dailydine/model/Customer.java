@@ -4,17 +4,19 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.github.devtamakuwala.dailydine.enums.SubscriptionStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Model for Customer
  */
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tblCustomer")
-@Data
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,6 +26,7 @@ public class Customer extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long customerId;
+
     /**
      * The user associated with this customer.
      * - @OneToOne: Defines a one-to-one relationship between Customer and User.
@@ -40,9 +43,31 @@ public class Customer extends AuditableEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     @JsonBackReference("user-customer")
     private User user;
+
     @Enumerated(EnumType.STRING)
     private SubscriptionStatus status;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date dateOfBirth;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return customerId == customer.customerId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customerId);
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "customerId=" + customerId +
+                ", status=" + status +
+                '}';
+    }
 }

@@ -2,11 +2,9 @@ package io.github.devtamakuwala.dailydine.controller;
 
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,6 +38,15 @@ public class UserController {
     @GetMapping("user/{id}")
     public ResponseEntity<?> getUser(@PathVariable int id) {
         return userService.getUser(id);
+    }
+
+
+    /**
+     * Update user data
+     * */
+    @PutMapping("user/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody User user) {
+        return userService.updateUser(id, user);
     }
 
 }

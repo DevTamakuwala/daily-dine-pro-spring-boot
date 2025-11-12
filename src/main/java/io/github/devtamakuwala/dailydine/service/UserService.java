@@ -88,4 +88,17 @@ public class UserService {
         }
         return ResponseEntity.badRequest().build();
     }
+
+    public ResponseEntity<?> updateUser(int id, User user) {
+
+        User user1 = userRepository.findById(id).orElse(null);
+
+        if (user1 != null) {
+            user1.setPhoneNo(user.getPhoneNo());
+            user1.setEmail(user.getEmail());
+
+        }
+
+        return null;
+    }
 }

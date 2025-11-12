@@ -1,5 +1,6 @@
 package io.github.devtamakuwala.dailydine.controller;
 
+import io.github.devtamakuwala.dailydine.DTO.MessNearbyDTO;
 import io.github.devtamakuwala.dailydine.model.User;
 import io.github.devtamakuwala.dailydine.service.MessService;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,12 +33,21 @@ public class MessController {
 
 
     /**
-     * Get all Unverified Mess owners
+     * Get all Verified Mess owners
      *
      */
     @GetMapping("/unverified")
     public ResponseEntity<?> getAllUnverifiedMess() {
         return messService.getAllUnverifiedMess();
+    }
+
+    /**
+     * Get all Unverified Mess owners
+     *
+     */
+    @GetMapping("/verified")
+    public ResponseEntity<?> getAllVerifiedMess() {
+        return messService.getAllVerifiedMess();
     }
 
 
@@ -78,6 +89,21 @@ public class MessController {
     @PutMapping(value = "approve/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> approveMess(@PathVariable("id") int id, @RequestBody Map<String, String> coordinates) {
         return messService.approveMess(id, coordinates);
+    }
+
+
+    @GetMapping("/nearby")
+    public ResponseEntity<?> getNearby(
+            @RequestParam double longitude,
+            @RequestParam double latitude,
+            @RequestParam double radius
+    ) {
+        List<MessNearbyDTO> list = messService.getNearbyActiveMess(longitude, latitude, radius);
+        radius *= 1000;
+        if (list == null || list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No mess found within "+radius+" m. Please try changing location.");
+        }
+        return ResponseEntity.ok(list);
     }
 
 }

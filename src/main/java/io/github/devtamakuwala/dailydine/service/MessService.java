@@ -1,6 +1,7 @@
 package io.github.devtamakuwala.dailydine.service;
 
 import io.github.devtamakuwala.dailydine.DTO.MessNearbyDTO;
+import io.github.devtamakuwala.dailydine.DTO.MessUpdateDTO;
 import io.github.devtamakuwala.dailydine.DTO.UnverifiedMessOwnerDTO;
 import io.github.devtamakuwala.dailydine.model.Mess;
 import io.github.devtamakuwala.dailydine.model.User;
@@ -11,6 +12,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,28 +124,53 @@ public class MessService {
      * @return A ResponseEntity containing the updated user data.
      */
     @CacheEvict(value = {"messes", "mess"}, allEntries = true)
-    public ResponseEntity<?> updateMess(int id, User user) {
+    @Transactional
+    public ResponseEntity<?> updateMess(int id, MessUpdateDTO messUpdateDTO) {
         User existingUser = userRepository.findById(id).orElse(null);
 
         if (existingUser == null) {
             return new ResponseEntity<>("User with id " + id + " not found.", HttpStatus.NOT_FOUND);
         }
 
+        // Basic validation: phone number is required to set messPhoneNo
+        if (messUpdateDTO.getPhoneNo() == 0L) {
+            // If client didn't provide phoneNo, keep existing phone or return bad request
+            if (existingUser.getPhoneNo() == 0L) {
+                return new ResponseEntity<>("phoneNo is required", HttpStatus.BAD_REQUEST);
+            }
+        }
+
         // Update the user fields from the request data.
-        existingUser.setPhoneNo(user.getPhoneNo());
-        existingUser.setActive(user.isActive());
+        if (messUpdateDTO.getPhoneNo() != 0L) {
+            existingUser.setPhoneNo(messUpdateDTO.getPhoneNo());
+        }
+        if (messUpdateDTO.getFname() != null) existingUser.setFirstName(messUpdateDTO.getFname());
+        if (messUpdateDTO.getLname() != null) existingUser.setLastName(messUpdateDTO.getLname());
 
-        userService.createUser(existingUser);
+        // Ensure Mess exists and update its fields
+        Mess mess = existingUser.getMess();
+        if (mess == null) {
+            // create a new Mess and initialize required fields to avoid DB constraints
+            mess = new Mess();
+            mess.setUser(existingUser);
+            // establisheDate is @NotNull in entity; set to today if missing
+            mess.setEstablisheDate(new java.util.Date());
+            // set messPhoneNo from DTO or user phone
+            long phoneToSet = messUpdateDTO.getPhoneNo() != 0L ? messUpdateDTO.getPhoneNo() : existingUser.getPhoneNo();
+            mess.setMessPhoneNo(phoneToSet);
+            existingUser.setMess(mess);
+        }
+        if (messUpdateDTO.getMessName() != null) mess.setMessName(messUpdateDTO.getMessName());
+        if (messUpdateDTO.getAddress() != null) mess.setAddress(messUpdateDTO.getAddress());
+        if (messUpdateDTO.getCity() != null) mess.setCity(messUpdateDTO.getCity());
+        if (messUpdateDTO.getState() != null) mess.setState(messUpdateDTO.getState());
+        if (messUpdateDTO.getZipCode() != null) mess.setZipCode(messUpdateDTO.getZipCode());
+        // keep messPhoneNo in sync with user's phone if desired
+        if (messUpdateDTO.getPhoneNo() != 0L) mess.setMessPhoneNo(messUpdateDTO.getPhoneNo());
 
-        // Update the associated mess details.
-        existingUser.getMess().setMessPhoneNo(user.getMess().getMessPhoneNo());
-        existingUser.getMess().setCity(user.getMess().getCity());
-        existingUser.getMess().setState(user.getMess().getState());
-        existingUser.getMess().setZipCode(user.getMess().getZipCode());
-        existingUser.getMess().setAddress(user.getMess().getAddress());
-        existingUser.getMess().setLatitude(user.getMess().getLatitude());
-        existingUser.getMess().setLongitude(user.getMess().getLongitude());
-        createMess(existingUser.getMess());
+        // Save the user (cascades to mess because of CascadeType.ALL)
+        userRepository.save(existingUser);
+
         return new ResponseEntity<>(existingUser, HttpStatus.OK);
     }
 

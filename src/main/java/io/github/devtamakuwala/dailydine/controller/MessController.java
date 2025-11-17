@@ -1,11 +1,10 @@
 package io.github.devtamakuwala.dailydine.controller;
 
 import io.github.devtamakuwala.dailydine.DTO.MessNearbyDTO;
-import io.github.devtamakuwala.dailydine.model.User;
+import io.github.devtamakuwala.dailydine.DTO.MessUpdateDTO;
 import io.github.devtamakuwala.dailydine.service.MessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +56,7 @@ public class MessController {
      */
     @GetMapping("")
     public ResponseEntity<?> getAllMess() {
-        return new ResponseEntity<>(messService.getAllMess(), HttpStatus.OK);
+        return messService.getAllMess();
     }
 
 
@@ -75,9 +74,9 @@ public class MessController {
      * Update Mess Data
      *
      */
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateMessData(@PathVariable("id") int id, @RequestBody User user) {
-        return messService.updateMess(id, user);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateMessData(@PathVariable("id") int id, @RequestBody MessUpdateDTO messUpdateDTO) {
+        return messService.updateMess(id, messUpdateDTO);
     }
 
 
@@ -86,22 +85,18 @@ public class MessController {
      * This is for admins
      *
      */
-    @PutMapping(value = "approve/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping("approve/{id}")
     public ResponseEntity<?> approveMess(@PathVariable("id") int id, @RequestBody Map<String, String> coordinates) {
         return messService.approveMess(id, coordinates);
     }
 
 
     @GetMapping("/nearby")
-    public ResponseEntity<?> getNearby(
-            @RequestParam double longitude,
-            @RequestParam double latitude,
-            @RequestParam double radius
-    ) {
+    public ResponseEntity<?> getNearby(@RequestParam double longitude, @RequestParam double latitude, @RequestParam double radius) {
         List<MessNearbyDTO> list = messService.getNearbyActiveMess(longitude, latitude, radius);
         radius *= 1000;
         if (list == null || list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No mess found within "+radius+" m. Please try changing location.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No mess found within " + radius + " m. Please try changing location.");
         }
         return ResponseEntity.ok(list);
     }

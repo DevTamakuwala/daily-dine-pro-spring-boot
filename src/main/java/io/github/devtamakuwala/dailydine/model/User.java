@@ -3,7 +3,10 @@ package io.github.devtamakuwala.dailydine.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.github.devtamakuwala.dailydine.enums.Role;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ public class User extends AuditableEntity {
     @JsonManagedReference("user-customer")
     private Customer customer;
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("false")
     private boolean mfaEnabled = false;
     private String mfaSecret;
 

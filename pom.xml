@@ -96,11 +96,11 @@
             <version>1.70</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>12.6.1.jre11</version> <!-- or appropriate version depending on your JDK -->
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.microsoft.sqlserver</groupId>-->
+        <!--            <artifactId>mssql-jdbc</artifactId>-->
+        <!--            <version>12.6.1.jre11</version> &lt;!&ndash; or appropriate version depending on your JDK &ndash;&gt;-->
+        <!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
         <dependency>
@@ -115,9 +115,15 @@
             <artifactId>totp-spring-boot-starter</artifactId>
             <version>1.7.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
+        <finalName>DailyDine</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
